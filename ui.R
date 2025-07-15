@@ -68,7 +68,7 @@ ui <- function(request) {
            column(width = 3, align="center", style ="background-color:#ffffff;font-family: Lato;", span( style="font-size: 38pt; color: #006548;", 
                                                                                                          htmlOutput("const_setdown")) |>
                     tagAppendAttributes(tabindex = 0),
-                  tags$p("Imparied Mobility Set Down") |>
+                  tags$p("Impaired Mobility Set Down") |>
                     tagAppendAttributes(tabindex = 0)
            ),
            ),

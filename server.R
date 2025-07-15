@@ -35,6 +35,12 @@ server <- function(input, output, session) {
 
   output$total <- renderText(formatC(nrow(input_const()),big.mark = ",",digits=0,format="f"))
   
+  const_step_free_unavail <- reactive ({
+    csv %>% filter(ConstituencyName %in% as.character(input$conSelect)) %>%
+      filter(StepFreeAccess %in% "noPartOfStation")
+  })
+  
+  output$const_step_free_unavail <- renderText(formatC(nrow(const_step_free_unavail()),big.mark = ",",digits=0,format="f"))
   
   const_step_free_whole <- reactive ({
     csv %>% filter(ConstituencyName %in% as.character(input$conSelect)) %>%
@@ -107,7 +113,7 @@ output$map <- renderLeaflet({
   b <- st_as_sf(input_const())
   bounds <- st_bbox(b) %>% as.character()
   
-  pal <- colorFactor(c("#d50000","#e09f00","#006548"), domain = c("Whole Station", "Partial Station", "Unavailable"))
+  pal <- colorFactor(c("#006548","#e09f00","#d50000"), domain = c("Whole Station", "Partial Station", "Unavailable"))
   
   leaflet(csv, options = leafletOptions(zoomControl = FALSE, attributionControl=FALSE, minZoom = 8, maxZoom = 15))  %>% 
     
@@ -115,13 +121,24 @@ output$map <- renderLeaflet({
                      options = providerTileOptions(noWrap = TRUE,minZoom = 8, maxZoom = 17))  %>%
     
     #  i don't think I want to show this because of boundary cases 
-    addPolygons(data=b,
-                color = "#121212",
-                group = "constituencies",
-                stroke = TRUE,
-                weight = 3,
-                opacity = 0.2,
-                fillOpacity = 0) %>%
+    # addPolygons(data=b,
+    #             color = "#121212",
+    #             group = "constituencies",
+    #             stroke = TRUE,
+    #             weight = 3,
+    #             opacity = 0.2,
+    #             fillOpacity = 0) %>%
+    
+    addCircleMarkers(lng = const_step_free_whole()$LONG, lat = const_step_free_whole()$LAT,
+                     radius = 6,
+                     group = "Show whole step free access",
+                     fillOpacity = 0.6,
+                     fillColor = "#006548",
+                     stroke = TRUE,
+                     weight = 1.2,
+                     opacity = 1,
+                     popup = lapply(const_step_free_whole()$label, HTML),
+                     color = "#FFFFFF") %>%
     
     addCircleMarkers(lng = const_step_free_partial()$LONG, lat = const_step_free_partial()$LAT,
                      radius = 6,
@@ -133,37 +150,26 @@ output$map <- renderLeaflet({
                      opacity = 1,
                      popup = lapply(const_step_free_partial()$label, HTML),
                      color = "#FFFFFF") %>%
-    
-    # addCircleMarkers(lng = con_points_serious()$longitude, lat = con_points_serious()$latitude,
-    #                  radius = 6,
-    #                  group = "Show serious casualties",
-    #                  fillOpacity = 0.6,
-    #                  fillColor = "#c82074",
-    #                  stroke = TRUE,
-    #                  weight = 1.2,
-    #                  opacity = 1,
-    #                  popup = lapply(con_points_serious()$label, HTML),
-    #                  color = "#FFFFFF") %>%
-    
-    addCircleMarkers(lng = const_step_free_whole()$LONG, lat = const_step_free_whole()$LAT,
+
+    addCircleMarkers(lng = const_step_free_unavail()$LONG, lat = const_step_free_unavail()$LAT,
                      radius = 6,
                      fillOpacity = 0.75,
-                     group = "Show step free access",
-                     fillColor = "#006548",
+                     group = "Show unavailable step free access",
+                     fillColor = "#d50000",
                      stroke = TRUE,
                      weight = 1,
-                     popup = lapply(const_step_free_whole()$label, HTML), 
+                     popup = lapply(const_step_free_unavail()$label, HTML),
                      color = "#FFFFFF") %>%
     
     addLegend(pal = pal,
               title = "Step-free access",
-              values = c("Whole","Partial","Unavailable"),
+              values = c("Unavailable", "Partial Station","Whole Station"),
               #con_points()$casualty_severity,
               opacity = 0.8
     ) %>%
     
     addLayersControl(
-      overlayGroups = c("Show step free access","Show partial step free access"),
+      overlayGroups = c("Show step free access","Show partial step free access", "Show unavailable step free access"),
       position = "bottomright",
       options = layersControlOptions(collapsed = FALSE)
     ) %>%

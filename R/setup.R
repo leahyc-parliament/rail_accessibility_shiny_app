@@ -8,8 +8,11 @@ library(stringr)
 library(leaflet)
 library(sf)
 
+load("data/data_with_geom.RData")
+csv <- final_output |> 
+  rename(ImpairedMobilitySetDown = ImpariedMobilitySetDown)
 
-csv <- read.csv("data/app_data_test.csv")
+# csv <- read.csv("data/station_accessibility.csv")
 
 constituencies <- read.csv("data/station_accessibility.csv") |> 
   select(ConstituencyName) |> 
@@ -27,9 +30,7 @@ table_data <- csv |>
          "National Key Toilet" = NationalKeyToilet,
          "Impaired Mobility Setdown" = ImpairedMobilitySetDown,
          "Induction Loop" = InductionLoop,
-         "Step Free Access" = StepFreeAccess,
-         "Constituency" = ConstituencyName)
-
+         "Step Free Access" = StepFreeAccess)
   
 
 # stations <- read.csv("data/station_accessibility.csv") |> 
