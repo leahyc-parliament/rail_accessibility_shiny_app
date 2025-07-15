@@ -94,10 +94,10 @@ ui <- function(request) {
   ),
   
   fluidRow(column(width=12,
-                  tags$p("These figures are based on ",tags$a(href="https://www.gov.uk/government/collections/road-accidents-and-safety-statistics","data published by the Department for Transport.", target = "_blank"), "They include all collisions reported to the police that resulted in injury.") |>
+                  tags$p("These figures are based on ",tags$a(href="https://raildata.org.uk/dataProduct/P-88ffe920-471c-4fd9-8e0d-95d5b9b7a257/overview","data published by National Rail.", target = "_blank")) |>
                     tagAppendAttributes(style="margin-top:10px",tabindex = 0)
   )),
-  #table
+  # Table
   fluidRow(column(width=12,
                   h2(textOutput("title3")) |>
                     tagAppendAttributes(tabindex = 0)

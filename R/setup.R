@@ -30,7 +30,8 @@ table_data <- csv |>
          "National Key Toilet" = NationalKeyToilet,
          "Impaired Mobility Setdown" = ImpairedMobilitySetDown,
          "Induction Loop" = InductionLoop,
-         "Step Free Access" = StepFreeAccess)
+         "Step Free Access" = StepFreeAccess,
+         "ConstituencyName")
   
 
 # stations <- read.csv("data/station_accessibility.csv") |> 

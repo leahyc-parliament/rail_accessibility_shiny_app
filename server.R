@@ -4,33 +4,17 @@ server <- function(input, output, session) {
     csv %>% filter(ConstituencyName %in% as.character(input$conSelect))
   })
   
-  # filtered_data <- reactive({
-  #   table_data[table_data$Constituency == input$conSelect]
-  # }) 
-  # 
   filtered_data <- reactive({
-    req(input$conSelect)  # Ensure input is not NULL
+    req(input$conSelect)  
     table_data |> 
-      filter(Constituency == input$conSelect) |> 
-      select(-Constituency)  # Correct way to exclude the column
+      filter(ConstituencyName == input$conSelect) |> 
+      select(-ConstituencyName) 
   })
   
   output$table <- renderDT({
     datatable(filtered_data(), 
               rownames = FALSE, 
               options = list(pageLength = 30))
-  })
-  
-  input_la <- reactive ({
-    csv %>% filter(LAName %in% as.character(input$laSelect))
-  })
-
-  input_reg <- reactive ({
-    csv %>% filter(RegionName %in% as.character(input$regionSelect))
-  })
-
-  input_station <- reactive ({
-    csv %>% filter(StationName %in% as.character(input$stationSelect))
   })
 
   output$total <- renderText(formatC(nrow(input_const()),big.mark = ",",digits=0,format="f"))
@@ -90,27 +74,18 @@ server <- function(input, output, session) {
   })
   
   output$const_setdown <- renderText(formatC(nrow(const_setdown()),big.mark = ",",digits=0,format="f"))
-
-  # con_points_fatal <- reactive ({
-  #   points %>% filter(Name == as.character(input$conSelect)) %>%
-  #     filter(age_band_of_casualty %in% input$ageSelect) %>%
-  #     filter(casualty_type %in% input$typeSelect ) %>%
-  #     filter(accident_year %in% input$yearSelect) %>%
-  #     filter(casualty_severity == "Fatal")
-  # })
-  # 
-  # output$fatal <- renderText(formatC(nrow(con_points_fatal()),big.mark = ",",digits=0,format="f"))
   
+
+# Titles 
 output$title1 <- renderText({paste("Number of stations in",as.character(input$conSelect),"with selected accessibility criteria")})
 output$title2 <- renderText({paste("Map of stations in",as.character(input$conSelect),"with step free access")})
 output$title3 <- renderText({paste("Accessibility features for stations in",as.character(input$conSelect))})
 
 
-# map
-#the map
+# Map
 output$map <- renderLeaflet({
   
-  b <- st_as_sf(input_const())
+  b <- st_as_sf(input_const(), coords = c("Longitude", "Latitude"), crs = 4326)
   bounds <- st_bbox(b) %>% as.character()
   
   pal <- colorFactor(c("#006548","#e09f00","#d50000"), domain = c("Whole Station", "Partial Station", "Unavailable"))
@@ -120,16 +95,7 @@ output$map <- renderLeaflet({
     addProviderTiles(providers$CartoDB.Positron,
                      options = providerTileOptions(noWrap = TRUE,minZoom = 8, maxZoom = 17))  %>%
     
-    #  i don't think I want to show this because of boundary cases 
-    # addPolygons(data=b,
-    #             color = "#121212",
-    #             group = "constituencies",
-    #             stroke = TRUE,
-    #             weight = 3,
-    #             opacity = 0.2,
-    #             fillOpacity = 0) %>%
-    
-    addCircleMarkers(lng = const_step_free_whole()$LONG, lat = const_step_free_whole()$LAT,
+    addCircleMarkers(lng = const_step_free_whole()$Longitude, lat = const_step_free_whole()$Latitude,
                      radius = 6,
                      group = "Show whole step free access",
                      fillOpacity = 0.6,
@@ -140,7 +106,7 @@ output$map <- renderLeaflet({
                      popup = lapply(const_step_free_whole()$label, HTML),
                      color = "#FFFFFF") %>%
     
-    addCircleMarkers(lng = const_step_free_partial()$LONG, lat = const_step_free_partial()$LAT,
+    addCircleMarkers(lng = const_step_free_partial()$Longitude, lat = const_step_free_partial()$Latitude,
                      radius = 6,
                      group = "Show partial step free access",
                      fillOpacity = 0.6,
@@ -151,7 +117,7 @@ output$map <- renderLeaflet({
                      popup = lapply(const_step_free_partial()$label, HTML),
                      color = "#FFFFFF") %>%
 
-    addCircleMarkers(lng = const_step_free_unavail()$LONG, lat = const_step_free_unavail()$LAT,
+    addCircleMarkers(lng = const_step_free_unavail()$Longitude, lat = const_step_free_unavail()$Latitude,
                      radius = 6,
                      fillOpacity = 0.75,
                      group = "Show unavailable step free access",
@@ -164,12 +130,11 @@ output$map <- renderLeaflet({
     addLegend(pal = pal,
               title = "Step-free access",
               values = c("Unavailable", "Partial Station","Whole Station"),
-              #con_points()$casualty_severity,
               opacity = 0.8
     ) %>%
     
     addLayersControl(
-      overlayGroups = c("Show step free access","Show partial step free access", "Show unavailable step free access"),
+      overlayGroups = c("Show whole step free access", "Show partial step free access", "Show unavailable step free access"),
       position = "bottomright",
       options = layersControlOptions(collapsed = FALSE)
     ) %>%
