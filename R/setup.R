@@ -8,15 +8,18 @@ library(stringr)
 library(leaflet)
 library(sf)
 
-load("data/data_with_geom.RData")
-csv <- final_output |> 
-  rename(ImpairedMobilitySetDown = ImpariedMobilitySetDown)
+load("data/app_data.RData")
+csv <- app_data |>
+  rename(ImpairedMobilitySetDown = ImpariedMobilitySetDown) |>
+  st_transform(crs = 4326)
 
-# csv <- read.csv("data/station_accessibility.csv")
+# load("data/OLD_to_be_removed/data_with_geom.RData")
+# csv <- final_output |>
+#   rename(ImpairedMobilitySetDown = ImpariedMobilitySetDown)
 
-constituencies <- read.csv("data/station_accessibility.csv") |> 
-  select(ConstituencyName) |> 
-  distinct() |> 
+# Add in const with no stations
+constituencies <- read.csv("data/constituency_region_country_2023.csv") |> 
+  select(ConstituencyName = new_constituency_name) |> 
   arrange(ConstituencyName)
 
 table_data <- csv |>

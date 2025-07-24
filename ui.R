@@ -94,7 +94,7 @@ ui <- function(request) {
   ),
   
   fluidRow(column(width=12,
-                  tags$p("These figures are based on ",tags$a(href="https://raildata.org.uk/dataProduct/P-88ffe920-471c-4fd9-8e0d-95d5b9b7a257/overview","data published by National Rail.", target = "_blank")) |>
+                  tags$p("These figures are based on ",tags$a(href="https://raildata.org.uk/dataProduct/P-88ffe920-471c-4fd9-8e0d-95d5b9b7a257/overview","data published by National Rail.", target = "_blank"), "Please note that station-specific information is provided and updated by the train or station operating company, so while generally reliable, some details may occasionally be out of date, incomplete or vary in accuracy." ) |>
                     tagAppendAttributes(style="margin-top:10px",tabindex = 0)
   )),
   # Table
